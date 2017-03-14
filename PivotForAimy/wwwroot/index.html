@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Pivot Tables for Aimy Plus</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.6.0/pivot.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.6.0/pivot.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.6.0/tips_data.min.js"></script>
+</head>
+
+<body>
+    <form>
+        <select id="siteId" name="siteId">
+            <option selected="selected" disabled="disabled">Site ID</option>
+        </select>
+        <select id="termId" name="termId">
+            <option selected="selected" disabled="disabled">Term ID</option>
+        </select>
+        <input type="submit" />
+    </form>
+
+    <div id="output"></div>
+
+    <script>
+        $(document).ready(function () {
+            $.getJSON("/api/Values/GetSiteIds", function (response) {
+                $.each(response,
+                    function (i, el) {
+                        $("#siteId").append('<option value="' +
+                            el.value +
+                            '">' +
+                            el.text +
+                            '</option>');
+                    });
+            });
+
+            $("#siteId").on('change', function () {
+                $("#termId").empty();
+                $.getJSON('api/Values/GetTermIdsForSite', { siteId: $("#siteId").val() },
+                    function (response) {
+                        $.each(response,
+                            function (i, el) {
+                                $("#termId").append('<option value="' +
+                                    el.value +
+                                    '">' +
+                                    el.text +
+                                    '</option>');
+                            });
+                    });
+            });
+
+            $("form").on("submit", function (e) {
+                e.preventDefault();
+                var form = $(this);
+                var route = "/api/Values/Dashboard";
+                $.getJSON(route, form.serialize(), function (result) {
+                    $("#output").pivotUI(result);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
